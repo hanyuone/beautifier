@@ -52,13 +52,17 @@
 
 ;; "Beautifies" Java/C#/C++ (any C-like language) code
 (defn beautify [input output]
+  ;; Opens file
   (let [lines
         (with-open [reader (io/reader input)]
           (doall (line-seq reader)))]
+    ;; Main loop
     (loop [stripped []
            endings []
            ind 0]
       (if (= ind (count lines))
+        ;; Spits out content to the output file
+        ;; when the loop is finished.
         (spit output
           (apply str
             (let [new-stripped
@@ -76,6 +80,8 @@
                    (inc (apply max (map count new-stripped))))
                  (nth endings b)
                  "\n")))))
+        ;; Separates special characters from the body at the beginning
+        ;; and end
         (let [line-no-ws (strip-ws (nth lines ind))
               previous
               (let [f-index
@@ -91,11 +97,13 @@
                         #(not (some #{%} "{};"))
                        (reverse line-no-ws))]
                   (subs line-no-ws
-                    (- (count line-no-ws)
-                      (if (nil? f-index) 0 f-index)))))
+                    (- (count line-no-ws) f-index))))
               stripped-line
               (subs line-no-ws
                 (count previous) (- (count line-no-ws) (count next)))]
+          ;; Append removed characters at the start to the end of
+          ;; the next line, and place removed characters at the end
+          ;; to the start of the next line.
           (if (= stripped-line "")
             (recur
               stripped
@@ -112,5 +120,6 @@
                   new-endings))
               (inc ind))))))))
 
+;; Main function
 (defn -main [& args]
   (beautify "resources/test.java" "resources/beautiful.java"))
