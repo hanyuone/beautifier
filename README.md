@@ -1,14 +1,5 @@
 # beautifier
 
-A Clojure library designed to ... well, that part is up to you.
+Beautifier is a program that makes any code from any C-like language (e.g. Java, C#, C++) beautiful - at least, according to a Python programmer.
 
-## Usage
-
-FIXME
-
-## License
-
-Copyright © 2017 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Example:

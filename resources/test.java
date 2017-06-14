@@ -26,32 +26,4 @@ public class ListStuff {
 
         return arr;
     }
-
-    public static int randint(int start, int end) {
-        float rand_float = Math.random();
-        int difference = end - start;
-
-        return (int) (rand_float * difference) + start;
-    }
-
-    public static int[] delete(int[] arr, int index) {
-        int[] new_arr = new int[arr.length - 1];
-
-        for (int a = 0; a < index; a++) {
-            new_arr[a] = arr[a];
-        }
-
-        for (int b = index + 1; b < arr.length; b++) {
-            new_arr[b - 1] = arr[b];
-        }
-
-        return new_arr;
-    }
-
-    public static int[] shuffle(int[] arr) {
-        int[] indices = new int[arr.length];
-
-        for (int a = 0; a < arr.length; a++)
-            indices[a] = a;
-    }
 }
