@@ -1,8 +1,12 @@
-# beautifier
+# Beautifier
 
-Beautifier is a program that makes any code from any C-like language (e.g. Java, C#, C++) beautiful - at least, according to a Python programmer.
+Beautifier is a Clojure program that makes any code from any C-like language (e.g. Java, C#, C++) beautiful...
 
-Example:
+at least, according to a Python programmer.
+
+## Examples:
+
+Before:
 
 ```java
 package com.qwerpderp.test;
@@ -35,6 +39,8 @@ public class ListStuff {
     }
 }
 ```
+
+After:
 
 ```java
 package com.qwerpderp.test                            ;
