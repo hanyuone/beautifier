@@ -1,54 +1,37 @@
 (ns beautifier.core
-  (:require [clojure.java.io :as io])
+  (:require [clojure.string :as s]
+            [clojure.java.io :as io])
   (:gen-class))
+
+(def gap (atom 1))
+
+;;; Private functions
 
 ;; Gets index of first item that satisfies pred:
 ;;    (first-index-of even? [1 2 3])
 ;; => 1
-(defn first-index-of [pred coll]
+(defn- first-index-of [pred coll]
   (loop [a 0]
     (cond
       (= a (count coll)) nil
       (pred (nth coll a)) a
       :else (recur (inc a)))))
 
-;; Strip all whitespace to the left:
-;;    (strip-ws-left "    a bcd efg")
-;; => "a bcd efg"
-(defn strip-ws-left [string]
-  (loop [a 0]
-    (cond
-      (>= a (count string)) ""
-      (not= (nth string a) \space) (subs string a)
-      :else (recur (inc a)))))
-
-;; Strip all whitespace to the right:
-;;    (strip-ws-right "a bcd efg    ")
-;; => "a bcd efg"
-(defn strip-ws-right [string]
-  (loop [a (dec (count string))]
-    (cond
-      (<= a -1) ""
-      (not= (nth string a) \space) (subs string 0 (inc a))
-      :else (recur (dec a)))))
-
-;; Strips all whitespace, from both directions:
-;;    (strip-ws "   abcd     ")
-;; => "abcd"
-(defn strip-ws [string]
-  (->> string
-    strip-ws-left
-    strip-ws-right))
-
 ;; Add spaces to the right until the string reaches
 ;; a certain length:
 ;;    (right-pad "abcd" 7)
 ;; => "abcd   "
-(defn right-pad [string length]
-  (loop [new-str string]
-    (if (>= (count new-str) length) new-str
-      (recur
-        (str new-str " ")))))
+(defn- right-pad [string length]
+  (format (str "%-" length "s") string))
+
+;;; Public functions
+
+;; Set the gap between the longest line and the
+;; special characters
+(defn set-gap [n]
+  (if (< n 1)
+    (throw (Exception. "Invalid gap size!"))
+    (reset! gap n)))
 
 ;; "Beautifies" Java/C#/C++ (any C-like language) code
 (defn beautify [input output]
@@ -77,12 +60,12 @@
               (for [b (range (count new-stripped))]
                 (str
                  (right-pad (nth new-stripped b)
-                   (inc (apply max (map count new-stripped))))
+                   (+ @gap (apply max (map count new-stripped))))
                  (nth endings b)
                  "\n")))))
         ;; Separates special characters from the body at the beginning
         ;; and end
-        (let [line-no-ws (strip-ws (nth lines ind))
+        (let [line-no-ws (s/trim (nth lines ind))
               previous
               (let [f-index
                     (first-index-of
@@ -122,4 +105,5 @@
 
 ;; Main function
 (defn -main [& args]
+  (set-gap 10)
   (beautify "resources/test.java" "resources/beautiful.java"))
