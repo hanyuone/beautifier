@@ -18,6 +18,12 @@ Run the test project by going to your command line, and typing `lein run` (provi
 
 This function sets the gap between the line with the maximum character count and the extra characters. `n` must be a positive integer.
 
+```clojure
+(include-blanks)
+```
+
+By default, Beautifier strips all lines with only spaces/tabs. By calling this function, you can tell Beautifier to include those "blank lines".
+
 ## Example output:
 
 ```java
