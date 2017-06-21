@@ -7,45 +7,51 @@
 
 ;; Atom to define the gap between special characters
 ;; and rest of code
-(def ^:private gap (atom 1))
+(def ^:private gap (atom 10))
 ;; Atom to define if blank lines are to be included
 (def ^:private blank-lines? (atom false))
 
-;; Gets index of first item that satisfies pred:
-;;    (first-index-of even? [1 2 3])
-;; => 1
-(defn ^:private first-index-of [pred coll]
+(defn ^:private first-index-of
+  "Gets the index of the first item in coll
+  that satisfies pred:
+     (first-index-of even? [1 2 3])
+  => 1"
+  [pred coll]
   (loop [a 0]
     (cond
       (= a (count coll)) nil
       (pred (nth coll a)) a
       :else (recur (inc a)))))
 
-;; Right-pads a string until it is greater than or
-;; equal to a given length:
-;;    (right-pad "abcd" 7)
-;; => "abcd   "
-(defn ^:private right-pad [string length]
+(defn ^:private right-pad
+  "Right-pads a string until it is greater than or
+  equal to a given length:
+     (right-pad \"abcd\" 7)
+  => \"abcd   \""
+  [string length]
   (loop [new-str string]
     (if (>= (count new-str) length) new-str
       (recur (str new-str " ")))))
 
 ;;; Public functions
 
-;; Set the gap between the longest line and the
-;; special characters
-(defn set-gap [n]
+(defn set-gap
+  "Sets the gap between the longest line and the
+  special characters."
+  [n]
   (if (< n 1)
     (throw (Exception. "Invalid gap size!"))
     (reset! gap n)))
 
-;; Include blank lines
-(defn include-blanks []
+(defn include-blanks
+  "Includes blank lines."
+  []
   (reset! blank-lines? true))
 
-;; Function that takes a list of lines as input,
-;; and returns beautified code as output.
-(defn beautify [lines]
+(defn beautify
+  "Takes in a list of lines of a program in a C-like language
+  (e.g. Java, C#, C++) and proceeds to 'beautify' it."
+  [lines]
   ;; Main loop
   (loop [stripped []
          endings []
@@ -53,7 +59,7 @@
     (if (= ind (count lines))
       ;; Spits out content to the output file
       ;; when the loop is finished.
-      (apply str
+      (s/join
         ;; Defines new list, in which all the lines have whitespace
         ;; at the front taken into account.
         (let [new-stripped
@@ -113,17 +119,35 @@
                 new-endings))
             (inc ind)))))))
 
-;; Function that beautifies a file, takes a file directory
-;; as both input and output.
-(defn beautify-file [in-file out-file]
+(defn beautify-file
+  "Beautifies in-file, and then spits the output to another
+  file. in-file and out-file must be valid file URIs."
+  [in-file out-file]
   (let [lines
         (with-open [reader (io/reader in-file)]
           (doall (line-seq reader)))]
     (spit out-file
       (beautify lines))))
 
-;; Main function
+(defn beautify-folder
+  "Beautifies an entire folder. in-file and out-file
+  must be valid folder URIs."
+  [in-folder out-folder]
+  (let [files
+        (map io/as-relative-path
+          (rest (file-seq (io/file in-folder))))]
+    (println files)
+    (loop [ind 0]
+      (when-not (= ind (count files))
+        (do
+          (let [file (nth files ind)
+                new-file
+                (str out-folder "\\"
+                  (subs file (inc (count in-folder))))]
+            (println file new-file)
+            (beautify-file file new-file))
+          (recur (inc ind)))))))
+
 (defn -main [& args]
-  (set-gap 10)
   (include-blanks)
-  (beautify-file "resources/test.java" "resources/beautiful.java"))
+  (beautify-folder "resources" "foo"))
